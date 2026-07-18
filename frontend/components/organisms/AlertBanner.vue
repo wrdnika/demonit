@@ -28,32 +28,32 @@ const emit = defineEmits<{
       <aside
         v-for="alert in alerts"
         :key="alert.id"
-        class="flex items-start gap-3 rounded-lg border border-alert/20 bg-alert-soft px-4 py-3 shadow-panel"
+        class="flex items-start gap-3 rounded-brutal border-3 border-ink bg-gred px-4 py-3 text-white shadow-brutal-red"
         role="alert"
       >
         <span
-          class="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded bg-alert text-xs font-bold text-white"
+          class="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-white text-xs font-bold text-gred"
           aria-hidden="true"
         >
           !
         </span>
 
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-semibold text-alert">
+          <p class="text-sm font-bold">
             Device offline
           </p>
-          <p class="truncate text-sm text-surface-900">
+          <p class="truncate text-sm opacity-90">
             {{ alert.message }}
           </p>
         </div>
 
         <button
           type="button"
-          class="rounded px-2 py-1 text-xs font-medium text-alert transition hover:bg-white/60"
+          class="rounded-full border-2 border-ink bg-white px-2.5 py-1 text-xs font-bold text-ink"
           :aria-label="`Dismiss alert for ${alert.deviceName}`"
           @click="emit('dismiss', alert.id)"
         >
-          Dismiss
+          ✕
         </button>
       </aside>
     </TransitionGroup>
@@ -61,7 +61,7 @@ const emit = defineEmits<{
     <button
       v-if="alerts.length > 1"
       type="button"
-      class="pointer-events-auto rounded bg-white px-3 py-1.5 text-xs font-medium text-surface-800 shadow-panel transition hover:bg-surface-100"
+      class="brutal-btn-ghost pointer-events-auto text-xs"
       @click="emit('dismissAll')"
     >
       Dismiss all

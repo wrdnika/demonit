@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/leveling/demonit/internal/config"
 	"github.com/leveling/demonit/internal/port/inbound"
 	"go.uber.org/zap"
 )
@@ -14,24 +15,35 @@ type RouterDeps struct {
 	DeviceService inbound.DeviceService
 	Validate      *validator.Validate
 	Logger        *zap.Logger
+	Auth          config.AuthConfig
+	CORS          config.CORSConfig
 }
 
 // NewRouter builds the Gin engine with all API routes registered.
+//
+// Auth model (intentionally not full user login):
+//   - POST /heartbeat     → device API key  (machines / IoT agents)
+//   - POST /devices       → admin API key   (dashboard register)
+//   - GET  /devices*      → public read     (dashboard polling)
+//   - GET  /healthz       → public
 func NewRouter(deps RouterDeps) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(corsMiddleware())
+	r.Use(corsMiddleware(deps.CORS.AllowedOrigins))
 	r.Use(requestLogger(deps.Logger))
 
 	heartbeat := NewHeartbeatHandler(deps.DeviceService, deps.Validate, deps.Logger)
-	devices := NewDeviceHandler(deps.DeviceService, deps.Logger)
+	devices := NewDeviceHandler(deps.DeviceService, deps.Validate, deps.Logger)
 
 	v1 := r.Group("/api/v1")
 	{
-		v1.POST("/heartbeat", heartbeat.Handle)
+		v1.POST("/heartbeat", requireAPIKey(HeaderDeviceAPIKey, deps.Auth.DeviceAPIKey), heartbeat.Handle)
+		v1.POST("/devices", requireAPIKey(HeaderAdminAPIKey, deps.Auth.AdminAPIKey), devices.Create)
 		v1.GET("/devices", devices.List)
+		v1.GET("/devices/:id", devices.Get)
+		v1.GET("/devices/:id/metrics", devices.ListMetrics)
 	}
 
 	r.GET("/healthz", func(c *gin.Context) {
@@ -41,17 +53,23 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	return r
 }
 
-func corsMiddleware() gin.HandlerFunc {
+func corsMiddleware(allowedOrigins []string) gin.HandlerFunc {
+	allowed := make(map[string]struct{}, len(allowedOrigins))
+	for _, o := range allowedOrigins {
+		allowed[o] = struct{}{}
+	}
+
 	return func(c *gin.Context) {
 		origin := c.GetHeader("Origin")
-		if origin == "" {
-			origin = "*"
+		if origin != "" {
+			if _, ok := allowed[origin]; ok {
+				c.Header("Access-Control-Allow-Origin", origin)
+				c.Header("Vary", "Origin")
+				c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, "+HeaderDeviceAPIKey+", "+HeaderAdminAPIKey)
+				c.Header("Access-Control-Max-Age", "86400")
+			}
 		}
-
-		c.Header("Access-Control-Allow-Origin", origin)
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)

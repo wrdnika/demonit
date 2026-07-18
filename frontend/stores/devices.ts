@@ -12,6 +12,8 @@ interface DevicesState {
   filterStatus: DeviceStatus | 'ALL'
   filterType: DeviceType | 'ALL'
   searchQuery: string
+  /** Monotonic counter so overlapping polls cannot apply stale results. */
+  fetchSeq: number
 }
 
 export const useDeviceStore = defineStore('devices', {
@@ -25,6 +27,7 @@ export const useDeviceStore = defineStore('devices', {
     filterStatus: 'ALL',
     filterType: 'ALL',
     searchQuery: '',
+    fetchSeq: 0,
   }),
 
   getters: {
@@ -59,6 +62,7 @@ export const useDeviceStore = defineStore('devices', {
   actions: {
     async fetchDevices() {
       const api = useDeviceApi()
+      const seq = ++this.fetchSeq
       this.loading = true
       this.error = null
 
@@ -66,20 +70,38 @@ export const useDeviceStore = defineStore('devices', {
         const previous = new Map(this.devices.map(d => [d.id, d.status]))
         const next = await api.listDevices()
 
+        // Drop stale responses if a newer poll already started.
+        if (seq !== this.fetchSeq) {
+          return
+        }
+
         this.detectOfflineTransitions(previous, next)
         this.devices = next
         this.lastFetchedAt = new Date().toISOString()
         this.connectionStatus = 'connected'
       }
       catch (err) {
+        if (seq !== this.fetchSeq) {
+          return
+        }
         this.connectionStatus = 'disconnected'
         this.error = err instanceof DeviceApiError
           ? err.message
           : 'Failed to load devices'
       }
       finally {
-        this.loading = false
+        if (seq === this.fetchSeq) {
+          this.loading = false
+        }
       }
+    },
+
+    async registerDevice(payload: { name: string, type: DeviceType }) {
+      const api = useDeviceApi()
+      const device = await api.registerDevice(payload)
+      this.devices = [device, ...this.devices]
+      this.connectionStatus = 'connected'
+      return device
     },
 
     async refreshConnection() {

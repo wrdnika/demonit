@@ -16,15 +16,15 @@ const pct = computed(() => {
 
 const fillClass = computed(() => {
   if (pct.value == null) {
-    return 'bg-surface-200'
+    return 'bg-paper'
   }
   if (pct.value >= 85) {
-    return 'bg-alert'
+    return 'bg-gred'
   }
   if (pct.value >= 65) {
-    return 'bg-amber-500'
+    return 'bg-gyellow'
   }
-  return 'bg-accent'
+  return 'bg-ggreen'
 })
 
 const display = computed(() =>
@@ -34,9 +34,9 @@ const display = computed(() =>
 
 <template>
   <div class="space-y-1.5">
-    <div class="flex items-center justify-between text-xs">
-      <span class="font-medium text-surface-800/70">{{ label }}</span>
-      <span class="font-mono text-surface-900">{{ display }}</span>
+    <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wide">
+      <span>{{ label }}</span>
+      <span class="font-mono">{{ display }}</span>
     </div>
     <div
       class="metric-track"

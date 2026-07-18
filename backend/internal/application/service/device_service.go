@@ -30,6 +30,35 @@ func NewDeviceService(repo outbound.DeviceRepository, logger *zap.Logger) *Devic
 	}
 }
 
+// RegisterDevice enrolls a new device in OFFLINE state until the first heartbeat.
+func (s *DeviceService) RegisterDevice(ctx context.Context, input domain.RegisterDeviceInput) (*domain.Device, error) {
+	if !domain.IsValidDeviceType(input.Type) {
+		return nil, domain.ErrInvalidDeviceType
+	}
+
+	now := time.Now().UTC()
+	device := &domain.Device{
+		ID:        uuid.New(),
+		Name:      input.Name,
+		Type:      input.Type,
+		Status:    domain.DeviceStatusOffline,
+		LastSeen:  now,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	if err := s.repo.Create(ctx, device); err != nil {
+		return nil, err
+	}
+
+	s.logger.Info("device registered",
+		zap.String("device_id", device.ID.String()),
+		zap.String("name", device.Name),
+		zap.String("type", string(device.Type)),
+	)
+	return device, nil
+}
+
 // ProcessHeartbeat marks the device ONLINE, updates last_seen, and stores a metric sample.
 func (s *DeviceService) ProcessHeartbeat(ctx context.Context, input domain.HeartbeatInput) error {
 	if !json.Valid(input.StatusPayload) {
@@ -58,9 +87,25 @@ func (s *DeviceService) ProcessHeartbeat(ctx context.Context, input domain.Heart
 	return nil
 }
 
-// ListDevices returns all registered devices with current status.
+// ListDevices returns all registered devices with latest metric samples when available.
 func (s *DeviceService) ListDevices(ctx context.Context) ([]domain.Device, error) {
 	return s.repo.FindAll(ctx)
+}
+
+// GetDevice returns a single device with its latest metrics.
+func (s *DeviceService) GetDevice(ctx context.Context, id uuid.UUID) (*domain.Device, error) {
+	return s.repo.FindByID(ctx, id)
+}
+
+// ListDeviceMetrics returns recent time-series samples for a device.
+func (s *DeviceService) ListDeviceMetrics(ctx context.Context, id uuid.UUID, limit int) ([]domain.DeviceMetric, error) {
+	if _, err := s.repo.FindByID(ctx, id); err != nil {
+		return nil, err
+	}
+	if limit <= 0 || limit > 200 {
+		limit = 50
+	}
+	return s.repo.ListMetrics(ctx, id, limit)
 }
 
 // MarkStaleDevicesOffline flips ONLINE devices older than olderThanSeconds to OFFLINE

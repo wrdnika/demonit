@@ -19,19 +19,19 @@ function metricLabel(value?: number) {
 </script>
 
 <template>
-  <tr class="border-b border-surface-100 transition-colors duration-200 hover:bg-surface-50">
+  <tr class="border-b-2 border-ink/10 transition-colors hover:bg-accent-soft/40">
     <td class="px-4 py-3">
-      <div class="min-w-0">
-        <p class="truncate text-sm font-semibold text-surface-900">
+      <NuxtLink :to="`/devices/${device.id}`" class="block min-w-0 hover:underline">
+        <p class="truncate text-sm font-bold">
           {{ device.name }}
         </p>
-        <p class="truncate font-mono text-xs text-surface-800/45" :title="device.id">
+        <p class="truncate font-mono text-xs text-ink/40" :title="device.id">
           {{ device.id }}
         </p>
-      </div>
+      </NuxtLink>
     </td>
     <td class="px-4 py-3">
-      <span class="rounded bg-surface-100 px-2 py-0.5 font-mono text-xs text-surface-800">
+      <span class="rounded-full border-2 border-ink bg-gyellow px-2.5 py-0.5 text-xs font-bold">
         {{ device.type }}
       </span>
     </td>
@@ -43,10 +43,10 @@ function metricLabel(value?: number) {
         <MetricBar label="CPU" :value="device.cpu_usage" />
       </div>
     </td>
-    <td class="px-4 py-3 font-mono text-xs text-surface-800">
+    <td class="px-4 py-3 font-mono text-xs font-bold">
       {{ metricLabel(device.ram_usage) }}
     </td>
-    <td class="px-4 py-3 font-mono text-xs text-surface-800/70">
+    <td class="px-4 py-3 font-mono text-xs">
       <time :datetime="device.last_seen">{{ lastSeenLabel }}</time>
     </td>
   </tr>

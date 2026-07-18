@@ -27,7 +27,7 @@ func main() {
 		panic("config: " + err.Error())
 	}
 
-	log, err := logger.New(os.Getenv("APP_ENV"))
+	log, err := logger.New(cfg.Server.Env)
 	if err != nil {
 		panic("logger: " + err.Error())
 	}
@@ -68,6 +68,8 @@ func main() {
 		DeviceService: deviceService,
 		Validate:      validate,
 		Logger:        log,
+		Auth:          cfg.Auth,
+		CORS:          cfg.CORS,
 	})
 
 	srv := &http.Server{

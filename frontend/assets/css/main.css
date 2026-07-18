@@ -4,24 +4,40 @@
 
 @layer base {
   html {
-    @apply antialiased scroll-smooth;
+    @apply scroll-smooth;
   }
 
   body {
-    @apply bg-surface-50 text-surface-900 font-sans;
+    @apply bg-paper font-sans text-ink antialiased;
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-accent;
+    @apply outline outline-2 outline-offset-2 outline-gblue;
   }
 }
 
 @layer components {
+  .brutal-card {
+    @apply rounded-brutal border-3 border-ink bg-white shadow-brutal;
+  }
+
+  .brutal-btn {
+    @apply inline-flex items-center justify-center rounded-full border-3 border-ink bg-gblue px-5 py-2.5 text-sm font-bold text-white shadow-brutal-sm transition hover:bg-ink active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .brutal-btn-ghost {
+    @apply inline-flex items-center justify-center rounded-full border-3 border-ink bg-white px-5 py-2.5 text-sm font-bold text-ink shadow-brutal-sm transition hover:bg-gyellow active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
+  }
+
+  .brutal-input {
+    @apply w-full rounded-brutal border-3 border-ink bg-white px-4 py-2.5 text-sm font-medium text-ink outline-none transition focus:shadow-brutal-blue;
+  }
+
   .metric-track {
-    @apply h-2 w-full overflow-hidden rounded bg-surface-100;
+    @apply h-3 w-full overflow-hidden rounded-full border-2 border-ink bg-paper;
   }
 
   .metric-fill {
-    @apply h-full rounded transition-all duration-500 ease-out;
+    @apply h-full rounded-full transition-all duration-500 ease-out;
   }
 }

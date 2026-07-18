@@ -2,6 +2,8 @@
 const store = useDeviceStore()
 const config = useRuntimeConfig()
 
+const sidebarOpen = ref(false)
+
 let pollTimer: ReturnType<typeof setInterval> | null = null
 
 onMounted(async () => {
@@ -22,8 +24,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-surface-50">
-    <AppSidebar />
+  <div class="flex min-h-screen bg-paper">
+    <AppSidebar :open="sidebarOpen" @close="sidebarOpen = false" />
 
     <div class="flex min-w-0 flex-1 flex-col">
       <AppNavbar
@@ -31,6 +33,7 @@ onBeforeUnmount(() => {
         :last-fetched-at="store.lastFetchedAt"
         :online-count="store.onlineCount"
         :offline-count="store.offlineCount"
+        @toggle-menu="sidebarOpen = !sidebarOpen"
       >
         <template #title>
           <slot name="title">
@@ -39,7 +42,7 @@ onBeforeUnmount(() => {
         </template>
       </AppNavbar>
 
-      <main id="main-content" class="flex-1 overflow-auto p-6">
+      <main id="main-content" class="flex-1 overflow-auto p-5 sm:p-8">
         <slot />
       </main>
     </div>

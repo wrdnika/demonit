@@ -1,16 +1,26 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
   padding?: boolean
+  tone?: 'white' | 'lime' | 'cyan' | 'sun' | 'pink'
 }>(), {
   padding: true,
+  tone: 'white',
 })
+
+const toneClass: Record<string, string> = {
+  white: 'bg-white shadow-brutal',
+  lime: 'bg-ggreen text-white shadow-brutal-green',
+  cyan: 'bg-gblue text-white shadow-brutal-blue',
+  sun: 'bg-gyellow text-ink shadow-brutal-yellow',
+  pink: 'bg-gred text-white shadow-brutal-red',
+}
 </script>
 
 <template>
-  <article class="rounded-lg border border-surface-200 bg-white shadow-panel">
+  <article class="rounded-brutal border-3 border-ink" :class="toneClass[tone]">
     <header
       v-if="$slots.header"
-      class="flex items-center justify-between gap-3 border-b border-surface-100 px-5 py-3"
+      class="flex items-center justify-between gap-3 border-b-3 border-ink px-5 py-3.5"
     >
       <slot name="header" />
     </header>
@@ -21,7 +31,7 @@ withDefaults(defineProps<{
 
     <footer
       v-if="$slots.footer"
-      class="border-t border-surface-100 px-5 py-3"
+      class="border-t-3 border-ink px-5 py-3.5"
     >
       <slot name="footer" />
     </footer>

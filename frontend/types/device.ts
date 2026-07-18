@@ -14,6 +14,8 @@ export interface Device {
   /** Present when the API joins the latest metric sample. */
   cpu_usage?: number
   ram_usage?: number
+  /** Dynamic hardware fields from latest heartbeat (cash_remaining, temperature, …). */
+  status_payload?: Record<string, unknown> | string
 }
 
 export interface MetricLog {
@@ -21,7 +23,7 @@ export interface MetricLog {
   device_id: string
   cpu_usage: number
   ram_usage: number
-  status_payload: Record<string, unknown>
+  status_payload: Record<string, unknown> | string
   timestamp: string
 }
 

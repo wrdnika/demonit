@@ -4,6 +4,7 @@ import type {
   ApiSuccessResponse,
   Device,
   HeartbeatPayload,
+  MetricLog,
 } from '~/types/device'
 
 export class DeviceApiError extends Error {
@@ -18,6 +19,11 @@ export class DeviceApiError extends Error {
     this.statusCode = statusCode
     this.details = details
   }
+}
+
+export interface RegisterDevicePayload {
+  name: string
+  type: Device['type']
 }
 
 /**
@@ -83,6 +89,53 @@ export function useDeviceApi() {
     return request<Device[]>('/api/v1/devices', { method: 'GET' })
   }
 
+  function getDevice(id: string) {
+    return request<Device>(`/api/v1/devices/${id}`, { method: 'GET' })
+  }
+
+  function listDeviceMetrics(id: string, limit = 50) {
+    return request<MetricLog[]>(`/api/v1/devices/${id}/metrics?limit=${limit}`, { method: 'GET' })
+  }
+
+  async function registerDevice(payload: RegisterDevicePayload) {
+    // Nuxt BFF keeps ADMIN_API_KEY on the server — do not call Go directly.
+    try {
+      const response = await $fetch<ApiResponse<Device>>('/api/devices', {
+        method: 'POST',
+        body: payload,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response || typeof response !== 'object') {
+        throw new DeviceApiError('Empty API response', 'EMPTY_RESPONSE', 500)
+      }
+      if ('success' in response && response.success === false) {
+        const err = response as ApiErrorResponse
+        throw new DeviceApiError(err.error.message, err.error.code, 400, err.error.details)
+      }
+      return (response as ApiSuccessResponse<Device>).data
+    }
+    catch (error) {
+      if (error instanceof DeviceApiError) {
+        throw error
+      }
+      const fetchError = error as {
+        statusCode?: number
+        statusMessage?: string
+        message?: string
+        data?: { message?: string, code?: string }
+      }
+      throw new DeviceApiError(
+        fetchError.data?.message || fetchError.statusMessage || fetchError.message || 'Register failed',
+        fetchError.data?.code || 'NETWORK_ERROR',
+        fetchError.statusCode || 0,
+      )
+    }
+  }
+
   function sendHeartbeat(payload: HeartbeatPayload) {
     return request<{ device_id: string, status: string }>('/api/v1/heartbeat', {
       method: 'POST',
@@ -107,6 +160,9 @@ export function useDeviceApi() {
   return {
     baseURL,
     listDevices,
+    getDevice,
+    listDeviceMetrics,
+    registerDevice,
     sendHeartbeat,
     checkHealth,
   }

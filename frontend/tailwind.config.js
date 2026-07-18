@@ -11,38 +11,63 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"DM Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['"Outfit"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        display: ['"Outfit"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        surface: {
-          50: '#f4f7f6',
-          100: '#e8eeec',
-          200: '#d1ddd9',
-          800: '#1e2a27',
-          900: '#121a18',
-          950: '#0b110f',
-        },
-        accent: {
-          DEFAULT: '#0d9488',
-          soft: '#ccfbf1',
-          strong: '#0f766e',
-        },
-        alert: {
-          DEFAULT: '#dc2626',
-          soft: '#fee2e2',
-        },
+        ink: '#202124',
+        paper: '#F8F9FA',
+        // Google palette
+        gblue: '#4285F4',
+        gred: '#EA4335',
+        gyellow: '#FBBC05',
+        ggreen: '#34A853',
+        lime: '#34A853',
+        pink: '#EA4335',
+        cyan: '#4285F4',
+        sun: '#FBBC05',
         online: {
-          DEFAULT: '#059669',
-          soft: '#d1fae5',
+          DEFAULT: '#202124',
+          soft: '#34A853',
         },
         offline: {
-          DEFAULT: '#dc2626',
-          soft: '#fee2e2',
+          DEFAULT: '#202124',
+          soft: '#EA4335',
+        },
+        alert: {
+          DEFAULT: '#202124',
+          soft: '#EA4335',
+        },
+        accent: {
+          DEFAULT: '#4285F4',
+          soft: '#D2E3FC',
+          strong: '#202124',
+        },
+        surface: {
+          50: '#F8F9FA',
+          100: '#F1F3F4',
+          200: '#202124',
+          800: '#202124',
+          900: '#202124',
+          950: '#202124',
         },
       },
+      borderRadius: {
+        brutal: '1rem',
+        'brutal-lg': '1.5rem',
+      },
       boxShadow: {
-        panel: '0 1px 2px rgb(18 26 24 / 0.06), 0 8px 24px rgb(18 26 24 / 0.06)',
+        brutal: '4px 4px 0 0 #202124',
+        'brutal-sm': '3px 3px 0 0 #202124',
+        'brutal-lg': '6px 6px 0 0 #202124',
+        'brutal-blue': '4px 4px 0 0 #4285F4',
+        'brutal-red': '4px 4px 0 0 #EA4335',
+        'brutal-yellow': '4px 4px 0 0 #FBBC05',
+        'brutal-green': '4px 4px 0 0 #34A853',
+      },
+      borderWidth: {
+        3: '3px',
       },
       keyframes: {
         'slide-down': {
@@ -60,9 +85,9 @@ module.exports = {
         },
       },
       animation: {
-        'slide-down': 'slide-down 0.25s ease-out',
-        'fade-in': 'fade-in 0.3s ease-out',
-        'pulse-dot': 'pulse-dot 1.6s ease-in-out infinite',
+        'slide-down': 'slide-down 0.2s ease-out',
+        'fade-in': 'fade-in 0.25s ease-out',
+        'pulse-dot': 'pulse-dot 1.4s ease-in-out infinite',
       },
     },
   },

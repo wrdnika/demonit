@@ -8,54 +8,70 @@ defineProps<{
   offlineCount: number
 }>()
 
+const emit = defineEmits<{
+  toggleMenu: []
+}>()
+
 const statusLabel = computed(() => ({
-  connected: 'API connected',
-  disconnected: 'API disconnected',
-  checking: 'Checking connection…',
+  connected: 'Live',
+  disconnected: 'Down',
+  checking: 'Checking',
 } as const))
 
-const statusDotClass = computed(() => ({
-  connected: 'bg-online',
-  disconnected: 'bg-offline',
-  checking: 'bg-amber-400 animate-pulse-dot',
+const statusTone = computed(() => ({
+  connected: 'bg-ggreen text-white',
+  disconnected: 'bg-gred text-white',
+  checking: 'bg-gyellow text-ink',
 } as const))
 </script>
 
 <template>
-  <header class="flex h-14 items-center justify-between gap-4 border-b border-surface-200 bg-white px-6">
-    <div>
-      <p class="text-sm font-semibold text-surface-900">
-        <slot name="title">
-          Dashboard
-        </slot>
-      </p>
-      <p v-if="lastFetchedAt" class="text-xs text-surface-800/50">
-        Updated
-        <time :datetime="lastFetchedAt">{{ new Date(lastFetchedAt).toLocaleTimeString() }}</time>
-      </p>
+  <header class="sticky top-0 z-20 flex h-[4.75rem] items-center justify-between gap-3 border-b-3 border-ink bg-white px-4 sm:px-8">
+    <div class="flex min-w-0 items-center gap-3">
+      <button
+        type="button"
+        class="inline-flex size-10 items-center justify-center rounded-brutal border-3 border-ink bg-white text-lg font-bold shadow-brutal-sm lg:hidden"
+        aria-label="Open navigation menu"
+        @click="emit('toggleMenu')"
+      >
+        ☰
+      </button>
+      <div class="min-w-0">
+        <p class="truncate text-xl font-extrabold tracking-tight">
+          <slot name="title">
+            Dashboard
+          </slot>
+        </p>
+        <p v-if="lastFetchedAt" class="text-xs font-medium text-ink/45">
+          Synced
+          <time :datetime="lastFetchedAt">{{ new Date(lastFetchedAt).toLocaleTimeString() }}</time>
+        </p>
+      </div>
     </div>
 
-    <div class="flex items-center gap-4">
-      <div class="hidden items-center gap-3 text-xs sm:flex" aria-label="Device summary">
-        <span class="rounded bg-online-soft px-2 py-1 font-medium text-online">
+    <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+      <div class="hidden items-center gap-2 text-xs font-bold sm:flex" aria-label="Device summary">
+        <span class="rounded-full border-2 border-ink bg-ggreen px-3 py-1 text-white shadow-brutal-sm">
           {{ onlineCount }} online
         </span>
-        <span class="rounded bg-offline-soft px-2 py-1 font-medium text-offline">
+        <span class="rounded-full border-2 border-ink bg-gred px-3 py-1 text-white shadow-brutal-sm">
           {{ offlineCount }} offline
         </span>
       </div>
 
       <div
-        class="inline-flex items-center gap-2 rounded-md border border-surface-200 bg-surface-50 px-3 py-1.5 text-xs font-medium"
+        class="inline-flex items-center gap-2 rounded-full border-2 border-ink px-3 py-1 text-xs font-bold shadow-brutal-sm"
+        :class="statusTone[connectionStatus]"
         role="status"
         :aria-label="statusLabel[connectionStatus]"
       >
         <span
-          class="size-2 rounded-full"
-          :class="statusDotClass[connectionStatus]"
+          class="size-2 rounded-full bg-current"
+          :class="connectionStatus === 'connected' ? 'animate-pulse-dot' : ''"
           aria-hidden="true"
         />
-        <span class="text-surface-800">{{ statusLabel[connectionStatus] }}</span>
+        <span class="hidden xs:inline sm:inline">API</span>
+        {{ statusLabel[connectionStatus] }}
       </div>
     </div>
   </header>

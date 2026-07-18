@@ -31,37 +31,47 @@ function formatRelativeTime(iso: string): string {
 </script>
 
 <template>
-  <BaseCard class="h-full transition duration-300 hover:border-accent/40">
-    <template #header>
-      <div class="min-w-0">
-        <h3 class="truncate text-sm font-semibold text-surface-900">
-          {{ device.name }}
-        </h3>
-        <p class="font-mono text-xs text-surface-800/50">
-          {{ device.type }}
-        </p>
+  <NuxtLink
+    :to="`/devices/${device.id}`"
+    class="block transition hover:-translate-y-1 hover:shadow-none"
+  >
+    <BaseCard class="h-full transition hover:shadow-brutal-blue">
+      <template #header>
+        <div class="min-w-0">
+          <h3 class="truncate text-base font-extrabold text-ink">
+            {{ device.name }}
+          </h3>
+          <p class="text-xs font-semibold uppercase tracking-wide text-ink/45">
+            {{ device.type }}
+          </p>
+        </div>
+        <BaseStatusBadge :status="device.status" />
+      </template>
+
+      <div class="space-y-4">
+        <MetricBar label="CPU" :value="device.cpu_usage" />
+        <MetricBar label="RAM" :value="device.ram_usage" />
+        <StatusPayloadList :payload="device.status_payload" :limit="4" />
+
+        <dl class="grid grid-cols-1 gap-1 border-t-2 border-ink/10 pt-3 text-xs font-medium">
+          <div class="flex justify-between gap-2">
+            <dt class="text-ink/45">
+              Last seen
+            </dt>
+            <dd class="font-mono font-semibold">
+              {{ lastSeenLabel }}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-ink/45">
+              ID
+            </dt>
+            <dd class="truncate font-mono" :title="device.id">
+              {{ device.id.slice(0, 8) }}…
+            </dd>
+          </div>
+        </dl>
       </div>
-      <BaseStatusBadge :status="device.status" />
-    </template>
-
-    <div class="space-y-4">
-      <MetricBar label="CPU" :value="device.cpu_usage" />
-      <MetricBar label="RAM" :value="device.ram_usage" />
-
-      <dl class="grid grid-cols-1 gap-1 text-xs text-surface-800/60">
-        <div class="flex justify-between gap-2">
-          <dt>Last seen</dt>
-          <dd class="font-mono text-surface-900">
-            {{ lastSeenLabel }}
-          </dd>
-        </div>
-        <div class="flex justify-between gap-2">
-          <dt>Device ID</dt>
-          <dd class="truncate font-mono" :title="device.id">
-            {{ device.id.slice(0, 8) }}…
-          </dd>
-        </div>
-      </dl>
-    </div>
-  </BaseCard>
+    </BaseCard>
+  </NuxtLink>
 </template>
