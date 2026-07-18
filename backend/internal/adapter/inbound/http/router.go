@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/leveling/demonit/internal/adapter/outbound/realtime"
 	"github.com/leveling/demonit/internal/config"
 	"github.com/leveling/demonit/internal/port/inbound"
 	"go.uber.org/zap"
@@ -17,6 +18,7 @@ type RouterDeps struct {
 	Logger        *zap.Logger
 	Auth          config.AuthConfig
 	CORS          config.CORSConfig
+	Hub           *realtime.Hub
 }
 
 // NewRouter builds the Gin engine with all API routes registered.
@@ -25,6 +27,7 @@ type RouterDeps struct {
 //   - POST /heartbeat     → device API key  (machines / IoT agents)
 //   - POST /devices       → admin API key   (dashboard register)
 //   - GET  /devices*      → public read     (dashboard polling)
+//   - GET  /events        → public SSE      (realtime offline alerts)
 //   - GET  /healthz       → public
 func NewRouter(deps RouterDeps) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
@@ -36,6 +39,7 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 
 	heartbeat := NewHeartbeatHandler(deps.DeviceService, deps.Validate, deps.Logger)
 	devices := NewDeviceHandler(deps.DeviceService, deps.Validate, deps.Logger)
+	events := NewEventsHandler(deps.Hub, deps.Logger)
 
 	v1 := r.Group("/api/v1")
 	{
@@ -44,6 +48,7 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 		v1.GET("/devices", devices.List)
 		v1.GET("/devices/:id", devices.Get)
 		v1.GET("/devices/:id/metrics", devices.ListMetrics)
+		v1.GET("/events", events.Stream)
 	}
 
 	r.GET("/healthz", func(c *gin.Context) {

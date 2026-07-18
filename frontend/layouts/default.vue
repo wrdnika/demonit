@@ -5,11 +5,16 @@ const config = useRuntimeConfig()
 const sidebarOpen = ref(false)
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
+const { connect, disconnect } = useAlertStream((payload) => {
+  store.applyOfflineEvent(payload)
+})
 
 onMounted(async () => {
   await store.refreshConnection()
   await store.fetchDevices()
+  connect()
 
+  // Keep a slower poll for metric freshness; offline alerts arrive via SSE.
   const interval = Number(config.public.pollIntervalMs) || 15000
   pollTimer = setInterval(() => {
     store.fetchDevices()
@@ -20,6 +25,7 @@ onBeforeUnmount(() => {
   if (pollTimer) {
     clearInterval(pollTimer)
   }
+  disconnect()
 })
 </script>
 

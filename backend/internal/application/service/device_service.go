@@ -18,14 +18,17 @@ var _ inbound.DeviceService = (*DeviceService)(nil)
 
 // DeviceService orchestrates device monitoring use cases.
 type DeviceService struct {
-	repo   outbound.DeviceRepository
-	logger *zap.Logger
+	repo     outbound.DeviceRepository
+	alerts   outbound.AlertPublisher
+	logger   *zap.Logger
 }
 
 // NewDeviceService wires a DeviceService with its dependencies.
-func NewDeviceService(repo outbound.DeviceRepository, logger *zap.Logger) *DeviceService {
+// alerts may be nil; offline events are then only logged.
+func NewDeviceService(repo outbound.DeviceRepository, alerts outbound.AlertPublisher, logger *zap.Logger) *DeviceService {
 	return &DeviceService{
 		repo:   repo,
+		alerts: alerts,
 		logger: logger,
 	}
 }
@@ -108,8 +111,8 @@ func (s *DeviceService) ListDeviceMetrics(ctx context.Context, id uuid.UUID, lim
 	return s.repo.ListMetrics(ctx, id, limit)
 }
 
-// MarkStaleDevicesOffline flips ONLINE devices older than olderThanSeconds to OFFLINE
-// and logs an alert for each transition. Returns the number of devices marked offline.
+// MarkStaleDevicesOffline flips ONLINE devices older than olderThanSeconds to OFFLINE,
+// logs alerts, and publishes realtime events for SSE subscribers.
 func (s *DeviceService) MarkStaleDevicesOffline(ctx context.Context, olderThanSeconds int) (int, error) {
 	threshold := time.Now().UTC().Add(-time.Duration(olderThanSeconds) * time.Second)
 
@@ -118,6 +121,7 @@ func (s *DeviceService) MarkStaleDevicesOffline(ctx context.Context, olderThanSe
 		return 0, err
 	}
 
+	now := time.Now().UTC()
 	for _, d := range offline {
 		s.logger.Warn("ALERT: device went offline (deadman's switch)",
 			zap.String("device_id", d.ID.String()),
@@ -126,6 +130,16 @@ func (s *DeviceService) MarkStaleDevicesOffline(ctx context.Context, olderThanSe
 			zap.Time("last_seen", d.LastSeen),
 			zap.Duration("stale_for", time.Since(d.LastSeen)),
 		)
+
+		if s.alerts != nil {
+			s.alerts.PublishDeviceOffline(domain.DeviceOfflineEvent{
+				DeviceID:   d.ID,
+				DeviceName: d.Name,
+				DeviceType: string(d.Type),
+				LastSeen:   d.LastSeen,
+				OccurredAt: now,
+			})
+		}
 	}
 
 	return len(offline), nil

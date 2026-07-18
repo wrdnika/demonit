@@ -133,6 +133,36 @@ export const useDeviceStore = defineStore('devices', {
       this.alerts = [alert, ...this.alerts].slice(0, 20)
     },
 
+    /** Apply realtime SSE offline event without waiting for the next poll. */
+    applyOfflineEvent(payload: {
+      device_id: string
+      device_name: string
+      last_seen?: string
+    }) {
+      const existing = this.devices.find(d => d.id === payload.device_id)
+      if (existing) {
+        if (existing.status === 'OFFLINE') {
+          return
+        }
+        existing.status = 'OFFLINE'
+        if (payload.last_seen) {
+          existing.last_seen = payload.last_seen
+        }
+        this.pushAlert(existing)
+        return
+      }
+
+      this.pushAlert({
+        id: payload.device_id,
+        name: payload.device_name,
+        type: 'ATM',
+        status: 'OFFLINE',
+        last_seen: payload.last_seen || new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+    },
+
     dismissAlert(alertId: string) {
       const target = this.alerts.find(a => a.id === alertId)
       if (target) {

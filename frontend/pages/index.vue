@@ -20,9 +20,6 @@ const stats = computed(() => [
 <template>
   <div class="mx-auto max-w-6xl space-y-6 animate-fade-in">
     <header class="space-y-2">
-      <p class="font-mono text-xs font-bold uppercase tracking-widest text-ink/50">
-        Fleet health
-      </p>
       <h2 class="text-3xl font-bold tracking-tight">
         Dashboard overview
       </h2>

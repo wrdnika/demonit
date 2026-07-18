@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	inboundhttp "github.com/leveling/demonit/internal/adapter/inbound/http"
 	"github.com/leveling/demonit/internal/adapter/outbound/postgres"
+	"github.com/leveling/demonit/internal/adapter/outbound/realtime"
 	"github.com/leveling/demonit/internal/adapter/outbound/worker"
 	"github.com/leveling/demonit/internal/application/service"
 	"github.com/leveling/demonit/internal/config"
@@ -43,13 +45,22 @@ func main() {
 		}
 	}()
 
-	if err := postgres.AutoMigrate(db); err != nil {
-		log.Fatal("database migration failed", zap.Error(err))
+	// AutoMigrate only in local/dev. Production must apply migrations/001_init.sql.
+	if isDevEnv(cfg.Server.Env) {
+		if err := postgres.AutoMigrate(db); err != nil {
+			log.Fatal("database migration failed", zap.Error(err))
+		}
+		log.Info("AutoMigrate applied (development)")
+	} else {
+		log.Info("skipping AutoMigrate; ensure SQL migrations are applied",
+			zap.String("env", cfg.Server.Env),
+		)
 	}
 
 	// --- Dependency injection (composition root) ---
+	hub := realtime.NewHub()
 	deviceRepo := postgres.NewDeviceRepository(db)
-	deviceService := service.NewDeviceService(deviceRepo, log)
+	deviceService := service.NewDeviceService(deviceRepo, hub, log)
 	validate := validator.New()
 
 	deadman := worker.NewDeadmanSwitch(
@@ -70,15 +81,16 @@ func main() {
 		Logger:        log,
 		Auth:          cfg.Auth,
 		CORS:          cfg.CORS,
+		Hub:           hub,
 	})
 
 	srv := &http.Server{
 		Addr:              cfg.Server.Addr(),
 		Handler:           router,
 		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       15 * time.Second,
-		WriteTimeout:      15 * time.Second,
-		IdleTimeout:       60 * time.Second,
+		// WriteTimeout must be 0 for long-lived SSE connections.
+		WriteTimeout: 0,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	go func() {
@@ -88,7 +100,6 @@ func main() {
 		}
 	}()
 
-	// Graceful shutdown on SIGINT / SIGTERM
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit
@@ -105,4 +116,13 @@ func main() {
 	}
 
 	log.Info("server stopped cleanly")
+}
+
+func isDevEnv(env string) bool {
+	switch strings.ToLower(strings.TrimSpace(env)) {
+	case "", "development", "dev", "local":
+		return true
+	default:
+		return false
+	}
 }
