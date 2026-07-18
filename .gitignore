@@ -1,0 +1,19 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Env secrets (any nested path)
+**/.env
+!**/.env.example
+
+# Dependencies & build artifacts
+**/node_modules/
+**/.nuxt/
+**/.output/
+**/dist/
+**/bin/
+**/vendor/
+**/coverage/

@@ -1,0 +1,32 @@
+# Nuxt / Nitro
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node
+node_modules
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Env (keep examples)
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.DS_Store
+.fleet
+.idea
+.vscode
+Thumbs.db
+
+# Coverage / test
+coverage
+.nyc_output

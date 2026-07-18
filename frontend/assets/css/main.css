@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased scroll-smooth;
+  }
+
+  body {
+    @apply bg-surface-50 text-surface-900 font-sans;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+@layer components {
+  .metric-track {
+    @apply h-2 w-full overflow-hidden rounded bg-surface-100;
+  }
+
+  .metric-fill {
+    @apply h-full rounded transition-all duration-500 ease-out;
+  }
+}
