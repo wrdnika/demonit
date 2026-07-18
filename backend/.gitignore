@@ -8,7 +8,7 @@ bin/
 *.exe
 *.test
 *.out
-server
+/backend/server
 
 # Go
 vendor/
