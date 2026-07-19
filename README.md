@@ -17,7 +17,29 @@ Features: device register, heartbeat metrics (CPU/RAM + JSON payload), deadman's
 | UI | Nuxt 3, Vue 3, Pinia, Tailwind |
 | Agents | Python / PowerShell / Bash — see [`scripts/`](scripts/README.md) |
 
-## Quick start
+## Quick start (Docker)
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Dashboard | http://localhost:3000 |
+| API | http://localhost:8080 |
+| Health | http://localhost:8080/healthz |
+| Postgres | localhost:5432 |
+
+Schema is applied automatically on first DB volume via `backend/migrations/001_init.sql`.  
+Agents still run on the host against `http://localhost:8080` (see [`scripts/`](scripts/README.md)).
+
+```bash
+docker compose down          # stop
+docker compose down -v       # stop + wipe DB volume
+```
+
+### Local dev (without Docker)
 
 ### 1. Postgres
 
@@ -59,7 +81,7 @@ Dashboard: `http://localhost:3000`
 
 ### 4. Register a device + run an agent
 
-1. Open the dashboard → **Register device** (or `POST /api/v1/devices` with `X-Admin-API-Key`)
+1. Open the dashboard → **Add device** (or `POST /api/v1/devices` with `X-Admin-API-Key`)
 2. Copy the device UUID
 3. Start an agent:
 
@@ -94,6 +116,8 @@ No user/password login (on purpose for IoT agents).
 |--------|------|--------|
 | POST | `/api/v1/heartbeat` | device key |
 | POST | `/api/v1/devices` | admin key |
+| PUT | `/api/v1/devices/:id` | admin key |
+| DELETE | `/api/v1/devices/:id` | admin key |
 | GET | `/api/v1/devices` | list + latest metrics |
 | GET | `/api/v1/devices/:id` | detail |
 | GET | `/api/v1/devices/:id/metrics` | history |
