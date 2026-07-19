@@ -62,6 +62,42 @@ func (s *DeviceService) RegisterDevice(ctx context.Context, input domain.Registe
 	return device, nil
 }
 
+// UpdateDevice changes name/type of an existing device.
+func (s *DeviceService) UpdateDevice(ctx context.Context, id uuid.UUID, input domain.UpdateDeviceInput) (*domain.Device, error) {
+	if !domain.IsValidDeviceType(input.Type) {
+		return nil, domain.ErrInvalidDeviceType
+	}
+
+	device, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	device.Name = input.Name
+	device.Type = input.Type
+	device.UpdatedAt = time.Now().UTC()
+
+	if err := s.repo.Update(ctx, device); err != nil {
+		return nil, err
+	}
+
+	s.logger.Info("device updated",
+		zap.String("device_id", device.ID.String()),
+		zap.String("name", device.Name),
+		zap.String("type", string(device.Type)),
+	)
+	return device, nil
+}
+
+// DeleteDevice removes a device and cascades metrics via FK.
+func (s *DeviceService) DeleteDevice(ctx context.Context, id uuid.UUID) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+	s.logger.Info("device deleted", zap.String("device_id", id.String()))
+	return nil
+}
+
 // ProcessHeartbeat marks the device ONLINE, updates last_seen, and stores a metric sample.
 func (s *DeviceService) ProcessHeartbeat(ctx context.Context, input domain.HeartbeatInput) error {
 	if !json.Valid(input.StatusPayload) {

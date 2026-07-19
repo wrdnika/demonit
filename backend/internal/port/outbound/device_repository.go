@@ -12,6 +12,8 @@ import (
 // Implementations live in adapter/outbound (e.g. PostgreSQL).
 type DeviceRepository interface {
 	Create(ctx context.Context, device *domain.Device) error
+	Update(ctx context.Context, device *domain.Device) error
+	Delete(ctx context.Context, id uuid.UUID) error
 	FindAll(ctx context.Context) ([]domain.Device, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*domain.Device, error)
 	MarkOffline(ctx context.Context, threshold time.Time) ([]domain.Device, error)

@@ -45,6 +45,12 @@ type RegisterDeviceInput struct {
 	Type DeviceType `json:"type" validate:"required"`
 }
 
+// UpdateDeviceInput is the command to rename/retarget an existing device.
+type UpdateDeviceInput struct {
+	Name string     `json:"name" validate:"required,min=2,max=255"`
+	Type DeviceType `json:"type" validate:"required"`
+}
+
 // IsValidDeviceType reports whether t is a known DeviceType.
 func IsValidDeviceType(t DeviceType) bool {
 	switch t {

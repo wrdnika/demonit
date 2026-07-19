@@ -104,6 +104,21 @@ export const useDeviceStore = defineStore('devices', {
       return device
     },
 
+    async updateDevice(id: string, payload: { name: string, type: DeviceType }) {
+      const api = useDeviceApi()
+      const device = await api.updateDevice(id, payload)
+      this.devices = this.devices.map(d => (d.id === id ? device : d))
+      this.connectionStatus = 'connected'
+      return device
+    },
+
+    async deleteDevice(id: string) {
+      const api = useDeviceApi()
+      await api.deleteDevice(id)
+      this.devices = this.devices.filter(d => d.id !== id)
+      this.connectionStatus = 'connected'
+    },
+
     async refreshConnection() {
       const api = useDeviceApi()
       this.connectionStatus = 'checking'

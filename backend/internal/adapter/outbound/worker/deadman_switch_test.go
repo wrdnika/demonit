@@ -18,6 +18,10 @@ type stubService struct {
 func (s *stubService) RegisterDevice(ctx context.Context, input domain.RegisterDeviceInput) (*domain.Device, error) {
 	return nil, nil
 }
+func (s *stubService) UpdateDevice(ctx context.Context, id uuid.UUID, input domain.UpdateDeviceInput) (*domain.Device, error) {
+	return nil, nil
+}
+func (s *stubService) DeleteDevice(ctx context.Context, id uuid.UUID) error { return nil }
 func (s *stubService) ProcessHeartbeat(ctx context.Context, input domain.HeartbeatInput) error {
 	return nil
 }

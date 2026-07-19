@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './components/**/*.{vue,js,ts}',
     './layouts/**/*.vue',
@@ -16,9 +17,10 @@ module.exports = {
         display: ['"Outfit"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        ink: '#202124',
-        paper: '#F8F9FA',
-        // Google palette
+        ink: 'rgb(var(--ink) / <alpha-value>)',
+        paper: 'rgb(var(--paper) / <alpha-value>)',
+        surface: 'rgb(var(--surface) / <alpha-value>)',
+        // Google palette — stay vivid in both themes
         gblue: '#4285F4',
         gred: '#EA4335',
         gyellow: '#FBBC05',
@@ -28,29 +30,21 @@ module.exports = {
         cyan: '#4285F4',
         sun: '#FBBC05',
         online: {
-          DEFAULT: '#202124',
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
           soft: '#34A853',
         },
         offline: {
-          DEFAULT: '#202124',
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
           soft: '#EA4335',
         },
         alert: {
-          DEFAULT: '#202124',
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
           soft: '#EA4335',
         },
         accent: {
           DEFAULT: '#4285F4',
-          soft: '#D2E3FC',
-          strong: '#202124',
-        },
-        surface: {
-          50: '#F8F9FA',
-          100: '#F1F3F4',
-          200: '#202124',
-          800: '#202124',
-          900: '#202124',
-          950: '#202124',
+          soft: 'rgb(var(--accent-soft) / <alpha-value>)',
+          strong: 'rgb(var(--ink) / <alpha-value>)',
         },
       },
       borderRadius: {
@@ -58,9 +52,9 @@ module.exports = {
         'brutal-lg': '1.5rem',
       },
       boxShadow: {
-        brutal: '4px 4px 0 0 #202124',
-        'brutal-sm': '3px 3px 0 0 #202124',
-        'brutal-lg': '6px 6px 0 0 #202124',
+        brutal: '4px 4px 0 0 rgb(var(--ink))',
+        'brutal-sm': '3px 3px 0 0 rgb(var(--ink))',
+        'brutal-lg': '6px 6px 0 0 rgb(var(--ink))',
         'brutal-blue': '4px 4px 0 0 #4285F4',
         'brutal-red': '4px 4px 0 0 #EA4335',
         'brutal-yellow': '4px 4px 0 0 #FBBC05',

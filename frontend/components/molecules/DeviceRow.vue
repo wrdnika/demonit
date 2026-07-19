@@ -5,6 +5,11 @@ const props = defineProps<{
   device: Device
 }>()
 
+const emit = defineEmits<{
+  edit: [device: Device]
+  delete: [device: Device]
+}>()
+
 const lastSeenLabel = computed(() => {
   const then = new Date(props.device.last_seen).getTime()
   if (Number.isNaN(then)) {
@@ -31,7 +36,7 @@ function metricLabel(value?: number) {
       </NuxtLink>
     </td>
     <td class="px-4 py-3">
-      <span class="rounded-full border-2 border-ink bg-gyellow px-2.5 py-0.5 text-xs font-bold">
+      <span class="rounded-full border-2 border-ink bg-gyellow px-2.5 py-0.5 text-xs font-bold text-[#202124]">
         {{ device.type }}
       </span>
     </td>
@@ -48,6 +53,24 @@ function metricLabel(value?: number) {
     </td>
     <td class="px-4 py-3 font-mono text-xs">
       <time :datetime="device.last_seen">{{ lastSeenLabel }}</time>
+    </td>
+    <td class="px-4 py-3">
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="text-xs font-bold underline"
+          @click="emit('edit', device)"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          class="text-xs font-bold text-gred underline"
+          @click="emit('delete', device)"
+        >
+          Delete
+        </button>
+      </div>
     </td>
   </tr>
 </template>

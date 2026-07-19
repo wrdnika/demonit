@@ -51,6 +51,35 @@ func (r *DeviceRepository) Create(ctx context.Context, device *domain.Device) er
 	return nil
 }
 
+func (r *DeviceRepository) Update(ctx context.Context, device *domain.Device) error {
+	result := r.db.WithContext(ctx).
+		Model(&DeviceModel{}).
+		Where("id = ?", device.ID).
+		Updates(map[string]any{
+			"name":       device.Name,
+			"type":       device.Type,
+			"updated_at": device.UpdatedAt,
+		})
+	if result.Error != nil {
+		return fmt.Errorf("update device: %w", result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return domain.ErrDeviceNotFound
+	}
+	return nil
+}
+
+func (r *DeviceRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	result := r.db.WithContext(ctx).Where("id = ?", id).Delete(&DeviceModel{})
+	if result.Error != nil {
+		return fmt.Errorf("delete device: %w", result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return domain.ErrDeviceNotFound
+	}
+	return nil
+}
+
 func (d deviceWithMetrics) toDomainDevice() domain.Device {
 	out := d.ToDomain()
 	out.CPUUsage = d.CPUUsage

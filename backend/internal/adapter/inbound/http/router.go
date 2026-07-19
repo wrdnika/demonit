@@ -45,6 +45,8 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	{
 		v1.POST("/heartbeat", requireAPIKey(HeaderDeviceAPIKey, deps.Auth.DeviceAPIKey), heartbeat.Handle)
 		v1.POST("/devices", requireAPIKey(HeaderAdminAPIKey, deps.Auth.AdminAPIKey), devices.Create)
+		v1.PUT("/devices/:id", requireAPIKey(HeaderAdminAPIKey, deps.Auth.AdminAPIKey), devices.Update)
+		v1.DELETE("/devices/:id", requireAPIKey(HeaderAdminAPIKey, deps.Auth.AdminAPIKey), devices.Delete)
 		v1.GET("/devices", devices.List)
 		v1.GET("/devices/:id", devices.Get)
 		v1.GET("/devices/:id/metrics", devices.ListMetrics)
@@ -70,7 +72,7 @@ func corsMiddleware(allowedOrigins []string) gin.HandlerFunc {
 			if _, ok := allowed[origin]; ok {
 				c.Header("Access-Control-Allow-Origin", origin)
 				c.Header("Vary", "Origin")
-				c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 				c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, "+HeaderDeviceAPIKey+", "+HeaderAdminAPIKey)
 				c.Header("Access-Control-Max-Age", "86400")
 			}

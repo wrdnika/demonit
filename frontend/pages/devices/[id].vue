@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 const api = useDeviceApi()
 
 const deviceId = computed(() => String(route.params.id || ''))
@@ -15,6 +16,8 @@ const device = ref<Device | null>(null)
 const metrics = ref<MetricLog[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+const formOpen = ref(false)
+const deleteOpen = ref(false)
 
 useHead({
   title: computed(() => device.value ? `${device.value.name} · Demonit` : 'Device · Demonit'),
@@ -59,16 +62,40 @@ function payloadPreview(payload: Record<string, unknown> | string) {
     return '{}'
   }
 }
+
+function onSaved(updated: Device) {
+  device.value = updated
+}
+
+function onDeleted() {
+  router.push('/devices')
+}
 </script>
 
 <template>
   <div class="mx-auto max-w-6xl space-y-6 animate-fade-in">
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-2">
       <NuxtLink to="/devices" class="brutal-btn-ghost text-xs">
         ← Back
       </NuxtLink>
-      <button type="button" class="brutal-btn text-xs" :disabled="loading" @click="load">
+      <button type="button" class="brutal-btn-ghost text-xs" :disabled="loading" @click="load">
         Refresh
+      </button>
+      <button
+        v-if="device"
+        type="button"
+        class="brutal-btn-ghost text-xs"
+        @click="formOpen = true"
+      >
+        Edit
+      </button>
+      <button
+        v-if="device"
+        type="button"
+        class="brutal-btn-danger text-xs"
+        @click="deleteOpen = true"
+      >
+        Delete
       </button>
     </div>
 
@@ -209,6 +236,20 @@ function payloadPreview(payload: Record<string, unknown> | string) {
           </div>
         </BaseCard>
       </section>
+
+      <DeviceFormModal
+        :open="formOpen"
+        mode="edit"
+        :device="device"
+        @close="formOpen = false"
+        @saved="onSaved"
+      />
+      <DeleteDeviceModal
+        :open="deleteOpen"
+        :device="device"
+        @close="deleteOpen = false"
+        @deleted="onDeleted"
+      />
     </template>
   </div>
 </template>

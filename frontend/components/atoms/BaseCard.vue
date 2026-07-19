@@ -8,10 +8,10 @@ withDefaults(defineProps<{
 })
 
 const toneClass: Record<string, string> = {
-  white: 'bg-white shadow-brutal',
+  white: 'bg-surface shadow-brutal',
   lime: 'bg-ggreen text-white shadow-brutal-green',
   cyan: 'bg-gblue text-white shadow-brutal-blue',
-  sun: 'bg-gyellow text-ink shadow-brutal-yellow',
+  sun: 'bg-gyellow text-[#202124] shadow-brutal-yellow',
   pink: 'bg-gred text-white shadow-brutal-red',
 }
 </script>

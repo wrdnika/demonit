@@ -97,12 +97,17 @@ export function useDeviceApi() {
     return request<MetricLog[]>(`/api/v1/devices/${id}/metrics?limit=${limit}`, { method: 'GET' })
   }
 
-  async function registerDevice(payload: RegisterDevicePayload) {
+  async function adminMutation<T>(
+    path: string,
+    method: 'POST' | 'PUT' | 'DELETE',
+    body?: RegisterDevicePayload,
+    fallback = 'Request failed',
+  ): Promise<T> {
     // Nuxt BFF keeps ADMIN_API_KEY on the server — do not call Go directly.
     try {
-      const response = await $fetch<ApiResponse<Device>>('/api/devices', {
-        method: 'POST',
-        body: payload,
+      const response = await $fetch<ApiResponse<T>>(path, {
+        method,
+        ...(body ? { body } : {}),
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -116,7 +121,7 @@ export function useDeviceApi() {
         const err = response as ApiErrorResponse
         throw new DeviceApiError(err.error.message, err.error.code, 400, err.error.details)
       }
-      return (response as ApiSuccessResponse<Device>).data
+      return (response as ApiSuccessResponse<T>).data
     }
     catch (error) {
       if (error instanceof DeviceApiError) {
@@ -129,11 +134,23 @@ export function useDeviceApi() {
         data?: { message?: string, code?: string }
       }
       throw new DeviceApiError(
-        fetchError.data?.message || fetchError.statusMessage || fetchError.message || 'Register failed',
+        fetchError.data?.message || fetchError.statusMessage || fetchError.message || fallback,
         fetchError.data?.code || 'NETWORK_ERROR',
         fetchError.statusCode || 0,
       )
     }
+  }
+
+  function registerDevice(payload: RegisterDevicePayload) {
+    return adminMutation<Device>('/api/devices', 'POST', payload, 'Register failed')
+  }
+
+  function updateDevice(id: string, payload: RegisterDevicePayload) {
+    return adminMutation<Device>(`/api/devices/${id}`, 'PUT', payload, 'Update failed')
+  }
+
+  function deleteDevice(id: string) {
+    return adminMutation<{ id: string }>(`/api/devices/${id}`, 'DELETE', undefined, 'Delete failed')
   }
 
   function sendHeartbeat(payload: HeartbeatPayload) {
@@ -163,6 +180,8 @@ export function useDeviceApi() {
     getDevice,
     listDeviceMetrics,
     registerDevice,
+    updateDevice,
+    deleteDevice,
     sendHeartbeat,
     checkHealth,
   }

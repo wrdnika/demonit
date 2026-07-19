@@ -64,6 +64,68 @@ func (h *DeviceHandler) Create(c *gin.Context) {
 	JSONSuccess(c, http.StatusCreated, "device registered", device)
 }
 
+type updateDeviceRequest struct {
+	Name string            `json:"name" validate:"required,min=2,max=255"`
+	Type domain.DeviceType `json:"type" validate:"required"`
+}
+
+// Update handles PUT /api/v1/devices/:id.
+func (h *DeviceHandler) Update(c *gin.Context) {
+	id, ok := parseDeviceID(c)
+	if !ok {
+		return
+	}
+
+	var req updateDeviceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		JSONError(c, http.StatusBadRequest, "INVALID_JSON", "request body must be valid JSON", nil)
+		return
+	}
+	if err := h.validate.Struct(req); err != nil {
+		JSONError(c, http.StatusBadRequest, "VALIDATION_ERROR", "request validation failed", ValidationDetails(err))
+		return
+	}
+
+	device, err := h.service.UpdateDevice(c.Request.Context(), id, domain.UpdateDeviceInput{
+		Name: req.Name,
+		Type: req.Type,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrDeviceNotFound):
+			JSONError(c, http.StatusNotFound, "DEVICE_NOT_FOUND", "device not found", nil)
+		case errors.Is(err, domain.ErrInvalidDeviceType):
+			JSONError(c, http.StatusBadRequest, "INVALID_DEVICE_TYPE", "type must be ATM, SERVER, or LAPTOP", nil)
+		default:
+			h.logger.Error("update device failed", zap.Error(err), zap.String("device_id", id.String()))
+			JSONError(c, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update device", nil)
+		}
+		return
+	}
+
+	JSONSuccess(c, http.StatusOK, "device updated", device)
+}
+
+// Delete handles DELETE /api/v1/devices/:id.
+func (h *DeviceHandler) Delete(c *gin.Context) {
+	id, ok := parseDeviceID(c)
+	if !ok {
+		return
+	}
+
+	if err := h.service.DeleteDevice(c.Request.Context(), id); err != nil {
+		if errors.Is(err, domain.ErrDeviceNotFound) {
+			JSONError(c, http.StatusNotFound, "DEVICE_NOT_FOUND", "device not found", nil)
+			return
+		}
+		h.logger.Error("delete device failed", zap.Error(err), zap.String("device_id", id.String()))
+		JSONError(c, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to delete device", nil)
+		return
+	}
+
+	JSONSuccess(c, http.StatusOK, "device deleted", gin.H{"id": id})
+}
+
 // List handles GET /api/v1/devices.
 func (h *DeviceHandler) List(c *gin.Context) {
 	devices, err := h.service.ListDevices(c.Request.Context())

@@ -21,6 +21,8 @@ type mockRepo struct {
 }
 
 func (m *mockRepo) Create(ctx context.Context, device *domain.Device) error { return nil }
+func (m *mockRepo) Update(ctx context.Context, device *domain.Device) error { return nil }
+func (m *mockRepo) Delete(ctx context.Context, id uuid.UUID) error          { return nil }
 func (m *mockRepo) FindAll(ctx context.Context) ([]domain.Device, error)     { return nil, nil }
 func (m *mockRepo) FindByID(ctx context.Context, id uuid.UUID) (*domain.Device, error) {
 	return nil, domain.ErrDeviceNotFound

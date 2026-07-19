@@ -11,6 +11,8 @@ import (
 // and background workers.
 type DeviceService interface {
 	RegisterDevice(ctx context.Context, input domain.RegisterDeviceInput) (*domain.Device, error)
+	UpdateDevice(ctx context.Context, id uuid.UUID, input domain.UpdateDeviceInput) (*domain.Device, error)
+	DeleteDevice(ctx context.Context, id uuid.UUID) error
 	ProcessHeartbeat(ctx context.Context, input domain.HeartbeatInput) error
 	ListDevices(ctx context.Context) ([]domain.Device, error)
 	GetDevice(ctx context.Context, id uuid.UUID) (*domain.Device, error)

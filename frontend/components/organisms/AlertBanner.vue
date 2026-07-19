@@ -32,7 +32,7 @@ const emit = defineEmits<{
         role="alert"
       >
         <span
-          class="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-white text-xs font-bold text-gred"
+          class="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface text-xs font-bold text-gred"
           aria-hidden="true"
         >
           !
@@ -49,7 +49,7 @@ const emit = defineEmits<{
 
         <button
           type="button"
-          class="rounded-full border-2 border-ink bg-white px-2.5 py-1 text-xs font-bold text-ink"
+          class="rounded-full border-2 border-ink bg-surface px-2.5 py-1 text-xs font-bold text-ink"
           :aria-label="`Dismiss alert for ${alert.deviceName}`"
           @click="emit('dismiss', alert.id)"
         >

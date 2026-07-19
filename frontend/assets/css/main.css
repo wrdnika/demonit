@@ -3,6 +3,20 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --ink: 32 33 36;
+    --paper: 248 249 250;
+    --surface: 255 255 255;
+    --accent-soft: 210 227 252;
+  }
+
+  html.dark {
+    --ink: 241 243 244;
+    --paper: 15 17 21;
+    --surface: 26 29 36;
+    --accent-soft: 36 48 72;
+  }
+
   html {
     @apply scroll-smooth;
   }
@@ -18,19 +32,23 @@
 
 @layer components {
   .brutal-card {
-    @apply rounded-brutal border-3 border-ink bg-white shadow-brutal;
+    @apply rounded-brutal border-3 border-ink bg-surface shadow-brutal;
   }
 
   .brutal-btn {
-    @apply inline-flex items-center justify-center rounded-full border-3 border-ink bg-gblue px-5 py-2.5 text-sm font-bold text-white shadow-brutal-sm transition hover:bg-ink active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-full border-3 border-ink bg-gblue px-5 py-2.5 text-sm font-bold text-white shadow-brutal-sm transition hover:bg-ink hover:text-paper active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .brutal-btn-ghost {
-    @apply inline-flex items-center justify-center rounded-full border-3 border-ink bg-white px-5 py-2.5 text-sm font-bold text-ink shadow-brutal-sm transition hover:bg-gyellow active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
+    @apply inline-flex items-center justify-center rounded-full border-3 border-ink bg-surface px-5 py-2.5 text-sm font-bold text-ink shadow-brutal-sm transition hover:bg-gyellow hover:text-[#202124] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none;
+  }
+
+  .brutal-btn-danger {
+    @apply inline-flex items-center justify-center rounded-full border-3 border-ink bg-gred px-5 py-2.5 text-sm font-bold text-white shadow-brutal-sm transition hover:bg-ink hover:text-paper active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .brutal-input {
-    @apply w-full rounded-brutal border-3 border-ink bg-white px-4 py-2.5 text-sm font-medium text-ink outline-none transition focus:shadow-brutal-blue;
+    @apply w-full rounded-brutal border-3 border-ink bg-surface px-4 py-2.5 text-sm font-medium text-ink outline-none transition focus:shadow-brutal-blue;
   }
 
   .metric-track {
@@ -39,5 +57,10 @@
 
   .metric-fill {
     @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  /* Shared chrome height so sidebar brand + top bar share one divider line */
+  .app-chrome-h {
+    @apply h-16 shrink-0;
   }
 }
